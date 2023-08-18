@@ -1,0 +1,13 @@
+FROM rjd_part1
+
+COPY assets/build/ "$TENDENCI_HOME"
+COPY assets/runtime/run.sh /runtime/run.sh
+
+RUN bash -x "$TENDENCI_HOME/install.sh"
+
+VOLUME "$TENDENCI_PROJECT_ROOT" "$TENDENCI_LOG_DIR"
+
+WORKDIR "$TENDENCI_INSTALL_DIR"
+
+ENTRYPOINT [ "/bin/bash" ]
+CMD [ "/runtime/run.sh" ]

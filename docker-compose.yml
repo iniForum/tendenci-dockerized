@@ -23,7 +23,8 @@ services:
 
     tendenci:
         restart: always
-        image: tendenci:latest
+#        image: tendenci:latest
+        image: rjdini/tendenci:qian
         depends_on: 
             postgresql:
                 condition: service_healthy

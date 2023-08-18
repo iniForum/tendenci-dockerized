@@ -1,0 +1,313 @@
+<!--
+   Attribution:
+   Copyright 2013-2015 Iron Summit Media Strategies, LLC                                 
+   Licensed under the Apache License, Version 2.0 (the "License");you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0                                 
+   Unless required by applicable law or agreed to in writing, software                                   
+   distributed under the License is distributed on an "AS IS" BASIS,                                   
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.                                   
+   See the License for the specific language governing permissions andlimitations under the License.
+   Alterations to this template have been made by Tendenci for use on the Tendenci Software.
+   -->
+<!-- Tendenci Specific Load Tags (Delete as Needed)
+   =========================================================== -->
+{% load base_filters %}
+{% load base_tags %}
+{% load theme_tags %}
+{% load story_tags %}
+{% load box_tags %}
+{% load forms_tags %}
+{% load news_tags %}
+{% load article_tags %}
+{% load photo_tags %}
+{% load event_tags %}
+{% load event_filters %}
+{% theme_extends "base.html" %}
+<!-- Meta Tags (for optimal SEO)
+   =========================================================== -->
+{% block title %}{{ block.super }} | {{ SITE_GLOBAL_SITEPRIMARYKEYWORDS }}{% endblock %}
+{% block meta_description %}{{ block.super }}{% endblock %}
+{% block meta_keywords %}{{ block.super }}, {{ SITE_GLOBAL_SITESECONDARYKEYWORDS }}{% endblock %}
+
+<!-- Start of the Body
+   =========================================================== -->
+{% block body_ids %}home{% endblock body_ids %}
+{% block body_classes %}home{% endblock body_classes %}
+{% block html_body %}
+<!-- begin: header -->
+{% theme_include "header.html" %}<!-- Pulls in Header Include -->
+<!-- end: header -->
+
+<style>
+  body {
+font-family: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol","Noto Color Emoji";  
+  } 
+
+  .topleft {  position: absolute;
+  top: 8px;
+  left: 16px;
+  font-size: 18px;
+}
+  
+  .topcenter {  position: absolute;
+  left: 0;
+  top: 8px;
+  width: 100%;
+  text-align: center;
+}
+
+
+/* CAROUSEL 
+=========== */
+#rotator_inner img {    
+  height: 500px;
+  min-width: 100%;
+  overflow: hidden;
+  object-fit: cover;
+}
+#rotator_inner .carousel-caption {
+  text-align: left; 
+  color: white;
+  background: rgba(52,153,243,0.0)
+}
+
+/* JUMBOTRON 
+=========== */
+.jumbotron {
+  box-shadow: none;
+  padding-top: 15px;  
+  padding-bottom: 15px; 
+}  
+  
+</style>  
+
+<div id="page-top-home" role="main">
+  
+     <!-- begin: #myCarousel
+      Main jumbotron for a primary marketing message or call to action. 
+      Jumbotron uses Responsive Carousel JS for rotation.
+      -->
+   {% list_stories as stories_list limit=6 tags="homepage" quality="90" data-interval="10000" %}
+   <div id="myCarousel" class="carousel slide" data-ride="carousel">
+     
+     <!-- Indicators -->    
+     <ol class="carousel-indicators">
+      <li data-target="#myCarousel" data-slide-to="0" class="active"></li>
+      <li data-target="#myCarousel" data-slide-to="1"></li>
+      <li data-target="#myCarousel" data-slide-to="2"></li>
+      <li data-target="#myCarousel" data-slide-to="3"></li>
+      <li data-target="#myCarousel" data-slide-to="4"></li>
+      <li data-target="#myCarousel" data-slide-to="5"></li>
+    </ol>
+
+     
+      <!-- begin: carousel-inner -->
+      <div class="carousel-inner" id="rotator_inner">
+        
+         <!-- begin: item active -->
+         <div class="item active">
+            {% for story in stories_list %}
+         <!--
+            <img class="img-responsive center-block" src="{{ story.photo.url }}" alt="{{ story.title }}" style="object-position:0% 100%; height:600px; object-fit:cover;">              
+       -->
+           <img class="img-responsive center-block" src="{{ story.photo.url }}" alt="{{ story.title }}" style="max-width: 100%; height:400px; ">  
+      
+           <!-- begin: carousel-caption -->
+          
+           <div class="carousel-caption topleft">           
+             <div class="panel col-xs-8" style="height: 140px;
+  width: 800px;   background: rgba(52,153,243,0.7);">           
+               <h2><a href="{{ story.full_story_link }}">{{ story.title }}</a></h2>
+               <p class="story-summary">{{ story.content|safe|truncatewords:40 }}</p>
+               <!--
+               <p><a class="btn btn-lg btn-primary" href="{{ story.full_story_link }}" role="button">Read more</a></p>
+               -->
+               </div>
+           </div>
+            <!-- end: carousel-caption -->
+     
+         </div>
+         <!-- end: item active -->
+        
+         <div class="item">
+            <!-- keep empty -->
+            {% endfor %}
+         </div>
+        
+      </div>
+<!-- end: carousel-inner -->
+     
+<!-- Left and right controls -->
+  <a class="left carousel-control" href="#myCarousel" data-slide="prev">
+    <span class="glyphicon glyphicon-chevron-left"></span>
+    <span class="sr-only">Previous</span>
+  </a>
+  <a class="right carousel-control" href="#myCarousel" data-slide="next">
+    <span class="glyphicon glyphicon-chevron-right"></span>
+    <span class="sr-only">Next</span>
+  </a>     
+          
+   </div>
+  <!-- end: #myCarousel -->
+ 
+  
+ 
+
+  
+<div class="container-fluid">
+  
+    <!-- begin: home-first-content-row -->  
+    <div class="row col-md-10 col-md-offset-1">
+    
+      
+      <div class="col-md-6">
+          {% box 4 %}
+          {% box 28 %}         
+      </div>     
+      
+   
+      <div class="col-md-5 col-md-offset-1 ">        
+                   
+       <!-- NEWS -->         
+         <div class="news-list">
+            <div class="panel panel-default">
+              <!-- begin: news-innerblock -->
+                 <div class="news-innerblock panel-heading">
+                 <h2 class="text-center text-info">{% trans 'Recent News' %}</h2>
+                    {% list_news as news_list limit=5 %}
+      
+                    <ul class="list-group">
+                    {% for news_item in news_list %}
+        
+                      <li class="list-group-item">
+                        <a href="{{ news_item.get_absolute_url }}">
+                        {% blocktrans with h=news_item.headline %}
+                        {{ h }}
+                        {% endblocktrans %}
+                        </a>
+                     </li>        
+                   {% endfor %}
+                   </ul>
+                 </div>
+              <!--end: news-innerblock-->
+              <div class="panel-footer">
+                 <nav aria-label="back to news">  
+                     <ul class="pager">
+                         <li class="next"><a href="/news/">More News<span aria-hidden="true"> &rarr;</span></a></li>
+                     </ul>
+                 </nav>
+              </div>    
+           </div>   
+        </div>
+        <!-- end: NEWS --> 
+      </div>
+    </div>          
+  <!-- end: home-first-content-row -->
+ 
+  
+  
+  <!-- begin: home-second-content-row -->
+
+  <div class="row col-md-10 col-md-offset-1">
+   
+         
+<!-- begin: forthcoming events -->      
+        <div class="col-md-6">
+          <div class="jumbotron" >
+            <div class="container">
+          <h2 class="text-primary">Forthcoming Events</h2>
+          {% list_events as events_list limit=3 %}    
+          <ol class="list-unstyled">
+            {% for event in events_list %}
+            <li>
+              <div class="jumbotron" style="background: rgba(52,153,243, 0.4); ">           
+                <div class="container">
+              <a href="{{ event.get_absolute_url }}"><h3 class="text-primary"><i class="fa fa-asterisk"></i>
+                {% blocktrans with title=event.title %}{{ title }}{% endblocktrans %}
+              </h3></a>
+              <p>{{ event.start_dt|date:"F j, Y - P" }}</p>
+              <h5>{{ event.place.name }}</h5>
+                  </div>
+              </div>  
+              </li>
+            {% empty %}
+            {% trans 'Events will be shown here. <a href="/events/add/">Start adding events now!</a>' %}           
+            {% endfor %}
+          </ol>
+          {% if event_list %}
+          <a href="{% url 'event.search' %}">{% trans 'View more events' %} »</a>
+          {% endif %}
+              </div>
+            </div>
+        </div>
+  <!-- end: forthcoming events -->
+      
+   
+ <div class="col-md-5 col-md-offset-1">
+    <!-- begin: site search -->
+<div class="panel panel-default">
+  <div class="panel-heading text-center">
+    <h2>Site Search</h2>
+   
+    {% if SITE_GLOBAL_SEARCHINDEX %}
+    <form class="form-inline" action="/search/" method="get" role="search">
+      <div class="form-group">
+        
+        <div class="input-group add-on">      
+          <input class="form-control" type="text" name="q" value="{{ request.GET.q|striptags }}" placeholder="Search" />
+          <div class="input-group-btn">
+            <button class="btn btn-default" type="submit">
+              <i class="glyphicon glyphicon-search" alt="{% trans 'Search' %}"></i>
+            </button>
+          </div>
+        </div>
+        
+      </div>
+      
+    </form>
+    {% endif %}
+    
+    <br /><br />
+  </div>
+</div>
+<!-- end: site search -->         
+    
+
+    
+  <!-- end: home-second-content-row -->
+      </div>
+     </div>
+    </div> 
+      
+  
+   <!-- Footer starts
+      =========================================================== -->
+   <footer>
+      {% theme_include 'footer.html' %}
+   </footer>
+   <!-- Footer Ends -->
+</div>
+{% endblock %} <!-- Ends the Body -->
+{% block extra_body %}
+{{ super.block }}
+<!-- Bootstrap core JavaScript
+   ================================================== -->
+<!-- Placed at the end of the document so the pages load faster -->
+<script>
+   !function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],
+   p=/^http:/.test(d.location)?'http':'https';
+   if(!d.getElementById(id)){
+   js=d.createElement(s);
+   js.id=id;js.src=p+"://platform.twitter.com/widgets.js";
+   fjs.parentNode.insertBefore(js,fjs);}}
+   (document,"script","twitter-wjs");
+</script>
+<script type="text/javascript">
+   $(document).ready(function() {
+   //code below helps remove extra .item that is added. 
+   //#rotator_inner helps target which carousel
+     $('#rotator_inner > .item:last').remove();
+     });
+</script>
+
+{% endblock extra_body %}

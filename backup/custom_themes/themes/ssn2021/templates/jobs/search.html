@@ -1,0 +1,87 @@
+{% extends "jobs/base.html" %}
+{% load base_tags %}
+{% load bootstrap_pagination_tags %}
+{% load job_tags %}
+{% load perm_tags %}
+{% load search_tags %}
+{% load profile_tags %}
+{% block title %}
+    {% if MODULE_JOBS_LABEL_PLURAL %}
+        Positions Available
+    {% else %}
+        Positions Available
+    {% endif %}
+    -
+    {{ block.super }}
+{% endblock %}
+{% block extra_head %}
+    {{ block.super }}
+    <link rel="alternate" type="application/rss+xml" title="{% trans 'Latest' %} {% firstof MODULE_JOBS_LABEL_PLURAL trans 'Jobs' %}" href="{% url 'job.feed' %}">
+    {% endblock %}
+    {% block content_classes %}
+        {{ block.super }}
+        t-search-view
+    {% endblock %}
+    {% block content %}
+    <div class="page-header">
+        <h1>
+            Positions Available
+        </h1>
+    </div>
+    {% if profile.is_member or user.profile.is_superuser or user.profile.is_active %}
+        <span style="display:hidden;">Welcome to the jobs page.</span>
+
+      {% autopaginate jobs 10 %}
+      {% job_search %}
+      <p class="capitalize">
+          {% if MODULE_JOBS_LABEL_PLURAL %}
+              <em>
+                  {% blocktrans with label_plural=MODULE_JOBS_LABEL_PLURAL count=paginator.count %}
+                      {{ count }}
+                      {{ label_plural }}
+                      Found
+                      {% endblocktrans %}</em>
+              {% else %}
+                  <em>{% blocktrans with count=paginator.count %}
+                      {{ count }}
+                      Jobs Found
+                      {% endblocktrans %}</em>
+              {% endif %}
+          </p>
+          <section>
+              {% for job in jobs %}
+                  {% search_result job %}
+                  {% empty %}
+                  {% if user.profile.is_staff %}
+                      <p>
+                          <a href="{% url 'job.add' %}">
+                              {% if MODULE_JOBS_LABEL %}
+                                  {% blocktrans with label=MODULE_JOBS_LABEL %}
+                                  Add a New
+                                  {{ label }}
+                                  {% endblocktrans %}
+                              {% else %}
+                                  {% trans "Add a New Job" %}
+                              {% endif %}
+                          </a>
+                      </p>
+                  {% endif %}
+              {% endfor %}
+          </section>
+          {% paginate %}
+      {% else %}
+        <span style="">This page is only available for active members. Please <a href="https://www.swissneuroscience.ch/memberships/applications/new-membership-application/">register</a> and make sure your membership is <a href="https://www.swissneuroscience.ch/profiles/">up-to-date</a>.</span>
+      {% endif %}
+          {% endblock %}
+          {% block extra_body %}
+              {{ block.super }}
+              <script type="text/javascript">
+                  $(document).ready(function () {
+                      var $catAndSubcatSelect = $('#id_categories, #id_subcategories'),
+                          $jobsSearchForm = $('#t-jobs-search-form');
+                      $catAndSubcatSelect.on('change', function (e) {
+                          $jobsSearchForm.submit();
+                      });
+                  });
+              </script>
+          {% endblock %}

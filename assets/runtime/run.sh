@@ -65,7 +65,6 @@ function initial_setup
 {
 
     cd "$TENDENCI_PROJECT_ROOT"
-    
     "$PYTHON" manage.py initial_migrate 
     "$PYTHON" manage.py deploy
     "$PYTHON" manage.py load_tendenci_defaults
@@ -74,8 +73,8 @@ function initial_setup
 
     create_superuser
     
-    touch "$TENDENCI_PROJECT_ROOT/conf/first_run"
-    echo  "Intital set up completed" && echo ""
+    touch "$TENDENCI_PROJECT_ROOT/conf/site_initialized_flag"
+    echo  "Initial set up completed" && echo ""
 
 }
 
@@ -86,7 +85,7 @@ function run
 }
 
 
-if [ ! -f "$TENDENCI_PROJECT_ROOT/conf/first_run" ]; then
+if [ ! -f "$TENDENCI_PROJECT_ROOT/conf/site_initialized_flag" ]; then
     setup_keys
     create_settings
     initial_setup

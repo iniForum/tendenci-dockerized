@@ -1,0 +1,28 @@
+#! /bin/bash
+
+# 2023-08-18 11:24:32 rjd updated script to generalize back on the basis of ../.env settings
+# rjd 11/16/2018, 10:58:10 PM
+
+# see: https://docs.docker.com/storage/volumes/#backup-restore-or-migrate-data-volumes
+
+# This script restores the data state of ${COMPOSE_PROJECT_NAME}_tendenci on the ${REMOTE_SYNC_HOST}_sync
+# The key state directories are ${TENDENCI_PROJECT_ROOT}/{conf, media, themes}
+# The directories are restored from their respective tar files, in ./${REMOTE_SYNC_HOST}_sync
+# Typically, these tars would be from the last backup (which stores to ./${REMOTE_SYNC_HOST}_sync).
+#
+# The strategy is to create a temporary ubuntu container, which mounts 1) the backed up tar file 2) the volume that tendenci-${COMPOSE_PROJECT_NAME} uses for this data (volumes-from).
+# Then ubuntu untars the backup into the relevant volume, and dies (such is Life..).
+# This process is repeated for each of the relevant volumes.
+#
+
+source ../.env
+echo "Loading ./${REMOTE_SYNC_HOST}_sync data to tendenci container ${COMPOSE_PROJECT_NAME}_tendenci"
+
+echo "**** typically, we do not wish to overwrite ./conf, ./static, and ./themes"
+# in case we overwrite valuable configuration, and or neglect our custome themes 
+echo "**** These tars are commented out. Vt default ONLY media.tar will be loaded."
+
+# docker run --rm --volumes-from ${COMPOSE_PROJECT_NAME}_tendenci -v $(pwd)/${REMOTE_SYNC_HOST}_sync:/backup ubuntu bash -c "cd ${TENDENCI_PROJECT_ROOT} && tar xvf /backup/conf.tar"
+docker run --rm --volumes-from ${COMPOSE_PROJECT_NAME}_tendenci -v $(pwd)/${REMOTE_SYNC_HOST}_sync:/backup ubuntu bash -c "cd ${TENDENCI_PROJECT_ROOT} && tar xvf /backup/media.tar"
+# docker run --rm --volumes-from ${COMPOSE_PROJECT_NAME}_tendenci -v $(pwd)/${REMOTE_SYNC_HOST}_sync:/backup ubuntu bash -c "cd ${TENDENCI_PROJECT_ROOT} && tar xvf /backup/themes.tar"
+# docker run --rm --volumes-from ${COMPOSE_PROJECT_NAME}_tendenci -v $(pwd)/${REMOTE_SYNC_HOST}_sync:/backup ubuntu bash -c "cd ${TENDENCI_PROJECT_ROOT} && tar xvf /backup/static.tar"

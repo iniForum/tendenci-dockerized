@@ -8,7 +8,8 @@ PYTHON=$(which python3)
 function check_dirs()
 {
     for dir in $TENDENCI_INSTALL_DIR\
-        $TENDENCI_LOG_DIR;
+        $TENDENCI_LOG_DIR\
+        /var/log/tendenci;
 do
     [ -d "$dir" ] || mkdir "$dir"
     chown "$TENDENCI_USER:" "$dir"

@@ -1,0 +1,36 @@
+version: '2.1'
+
+services:
+    postgresql:
+        container_name: ${POSTGRES_HOST}
+        restart: always
+        image: postgis/postgis:15-3.3
+#        image: rjdini/postgis:12-2.5
+        volumes:
+            - psql-vol:/var/lib/postgresql/data
+            - ./assets/build/initdb.sh:/docker-entrypoint-initdb.d/initdb.sh
+        ports:
+            - ${PGDB_PORT}:5432
+        networks:
+            - tendenci    
+        environment:
+            - TENDENCI_USER=${POSTGRES_USER:-tendenci-usr}
+            - TENDENCI_DB=${POSTGRES_DB:-tendenci}
+            - TENDENCI_PASS=${POSTGRES_PASSWORD:-mycomplexpassword}
+            - POSTGRES_PASSWORD=${POSTGRES_SUPERUSER_PASSWORD:-mycomplexpassword}
+        # healthcheck:
+        #     test: ["CMD", "pg_isready", "-h", "localhost", "-d", "${POSTGRES_DB:-tendenci}", "-U", "${POSTGRES_USER:-tendenci-usr}", "-p", "5432"]
+        #     interval: 30s  # 20s
+        #     timeout: 5s
+        #     retries: 5
+
+
+
+volumes:
+    psql-vol:
+
+networks:
+  traefik_proxy:
+    external: true
+  tendenci:
+    external: true

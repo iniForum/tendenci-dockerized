@@ -1,0 +1,61 @@
+version: '2.1'
+
+services:
+ 
+    tendenci:
+        container_name: ${COMPOSE_PROJECT_NAME}_tendenci
+ #       restart: always
+        image: rjdini/tendenci:rjd
+        # depends_on: 
+        #     postgresql:
+        #         condition: service_healthy
+        volumes:
+           - logs-vol:/var/log/mysite
+           - root-vol:/home/tendenci/install/mysite
+           - ./assets/runtime:/runtime
+        ports:
+ #           - 6080:8000
+            - 8000
+        networks:
+            - traefik_proxy
+            - tendenci
+        environment:
+            # Postgresql setup
+            - DB_USER=${POSTGRES_USER:-tendenci-usr}
+            - DB_NAME=${POSTGRES_DB:-tendenci}
+            - DB_PASS=${POSTGRES_PASSWORD:-mycomplexpassword}
+            - DB_HOST=${POSTGRES_HOST:-postgresql}
+            - DB_PORT=${POSTGRES_PORT:-5432} 
+
+            # Superuser setup
+            - ADMIN_USER=${ADMIN_USER:-admin}
+            - ADMIN_MAIL=${ADMIN_MAIL:-admin@example.com}
+            - ADMIN_PASS=${ADMIN_PASS:-password}
+            - SITE_URL=${SITE_URL:-HTTP://myurl.com}
+            - TIME_ZONE=${TIME_ZONE:-GMT+0}
+            - SECRET_KEY=${SECRET_KEY}
+            - SITE_SETTINGS_KEY=${SITE_SETTINGS_KEY}
+        labels:
+            - "traefik.enable=true"
+            - "traefik.http.routers.${COMPOSE_PROJECT_NAME}_tendenci.entrypoints=http"
+            - "traefik.http.routers.${COMPOSE_PROJECT_NAME}_tendenci.rule=Host(`${COMPOSE_PROJECT_NAME}.${HOST_DOMAIN_NAME}`)"
+            - "traefik.http.middlewares.${COMPOSE_PROJECT_NAME}_tendenci-https-redirect.redirectscheme.scheme=https"
+            - "traefik.http.routers.${COMPOSE_PROJECT_NAME}_tendenci.middlewares=${COMPOSE_PROJECT_NAME}_tendenci-https-redirect"
+            - "traefik.http.routers.${COMPOSE_PROJECT_NAME}_tendenci-secure.entrypoints=https"
+            - "traefik.http.routers.${COMPOSE_PROJECT_NAME}_tendenci-secure.rule=Host(`${COMPOSE_PROJECT_NAME}.${HOST_DOMAIN_NAME}`)"
+            - "traefik.http.routers.${COMPOSE_PROJECT_NAME}_tendenci-secure.tls=true"
+            - "traefik.http.routers.${COMPOSE_PROJECT_NAME}_tendenci-secure.tls.certresolver=http"
+            - "traefik.http.routers.${COMPOSE_PROJECT_NAME}_tendenci-secure.service=${COMPOSE_PROJECT_NAME}_tendenci"
+            - "traefik.http.services.${COMPOSE_PROJECT_NAME}_tendenci.loadbalancer.server.port=8000"
+            - "traefik.docker.network=traefik_proxy"    
+
+volumes:
+    root-vol:
+    logs-vol:
+
+
+networks:
+  traefik_proxy:
+    external: true
+  tendenci:
+    external: true
