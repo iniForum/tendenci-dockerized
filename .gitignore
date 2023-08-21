@@ -1,3 +1,4 @@
 .env
 backup/localhost
 backup/*_sync
+backup/tendenci_*

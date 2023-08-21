@@ -3,7 +3,7 @@
 
 # 2023-08-18 15:01:35 rjd updated script to generalize back on the basis of ../.env settings
 
-source .env
+source ../.env
 
 DB_HOST=${POSTGRES_HOST}
 DB_USER=${POSTGRES_USER}

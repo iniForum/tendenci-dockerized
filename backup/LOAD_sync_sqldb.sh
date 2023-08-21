@@ -15,5 +15,5 @@
 source ../.env
 echo "Loading ./${REMOTE_SYNC_HOST}_syn data to postgis container ${COMPOSE_PROJECT_NAME}_postgis"
 
-cat ./${REMOTE_SYNC_HOST}_syn/${REMOTE_SYNC_SQL} | docker exec -i ${COMPOSE_PROJECT_NAME}_postgis /usr/bin/psql -h localhost -U postgres
+cat $(pwd)/${REMOTE_SYNC_HOST}_sync/${REMOTE_SYNC_SQL} | docker exec -i ${COMPOSE_PROJECT_NAME}_postgis /usr/bin/psql -h localhost -U postgres
 
