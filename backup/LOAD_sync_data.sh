@@ -18,11 +18,11 @@
 source ../.env
 echo "Loading ./${REMOTE_SYNC_HOST}_sync data to tendenci container ${COMPOSE_PROJECT_NAME}_tendenci"
 
-echo "**** typically, we do not wish to overwrite ./conf, ./static, and ./themes"
+echo "**** typically, we do not wish to overwrite ./static"
 # in case we overwrite valuable configuration, and or neglect our custome themes 
-echo "**** These tars are commented out. Vt default ONLY media.tar will be loaded."
+echo "**** The tstatic tar is commented out."
 
-#docker run --rm --volumes-from ${COMPOSE_PROJECT_NAME}_tendenci -v $(pwd)/${REMOTE_SYNC_HOST}_sync:/backup ubuntu bash -c "cd ${TENDENCI_PROJECT_ROOT} && tar xvf /backup/conf.tar"
+docker run --rm --volumes-from ${COMPOSE_PROJECT_NAME}_tendenci -v $(pwd)/${REMOTE_SYNC_HOST}_sync:/backup ubuntu bash -c "cd ${TENDENCI_PROJECT_ROOT} && tar xvf /backup/conf.tar"
 docker run --rm --volumes-from ${COMPOSE_PROJECT_NAME}_tendenci -v $(pwd)/${REMOTE_SYNC_HOST}_sync:/backup ubuntu bash -c "cd ${TENDENCI_PROJECT_ROOT} && tar xvf /backup/media.tar"
 docker run --rm --volumes-from ${COMPOSE_PROJECT_NAME}_tendenci -v $(pwd)/${REMOTE_SYNC_HOST}_sync:/backup ubuntu bash -c "cd ${TENDENCI_PROJECT_ROOT} && tar xvf /backup/themes.tar"
 #docker run --rm --volumes-from ${COMPOSE_PROJECT_NAME}_tendenci -v $(pwd)/${REMOTE_SYNC_HOST}_sync:/backup ubuntu bash -c "cd ${TENDENCI_PROJECT_ROOT} && tar xvf /backup/static.tar"

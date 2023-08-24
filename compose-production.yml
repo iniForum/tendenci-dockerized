@@ -26,7 +26,8 @@ services:
   tendenci:
     container_name: ${COMPOSE_PROJECT_NAME}_tendenci
     restart: always
-    image: rjdini/tendenci:14.5.1
+#    image: rjdini/tendenci:14.5.1
+    image: rjdini/tendenci:test  # testing cron
     depends_on:
       postgresql:
         condition: service_healthy
@@ -56,6 +57,28 @@ services:
       - TIME_ZONE=${TIME_ZONE:-GMT+0}
       - SECRET_KEY=${SECRET_KEY}
       - SITE_SETTINGS_KEY=${SITE_SETTINGS_KEY}
+
+      # email setup
+      - EMAIL_BACKEND=${EMAIL_BACKEND}
+      - EMAIL_USE_TLS=${EMAIL_USE_TLS}
+      - EMAIL_HOST=${EMAIL_HOST}
+      - EMAIL_PORT=${EMAIL_PORT}
+      - EMAIL_HOST_USER=${EMAIL_HOST_USER}
+      - EMAIL_HOST_PASSWORD=${EMAIL_HOST_PASSWORD}
+
+      - DEFAULT_FROM_EMAIL=${DEFAULT_FROM_EMAIL}
+      - SERVER_EMAIL=${SERVER_EMAIL}
+            
+      # email newsletter setup
+      - NEWSLETTER_EMAIL_HOST=${NEWSLETTER_EMAIL_HOST}
+      - NEWSLETTER_EMAIL_PORT=${NEWSLETTER_EMAIL_PORT}
+      - NEWSLETTER_EMAIL_HOST_USER=${NEWSLETTER_EMAIL_HOST_USER}
+      - NEWSLETTER_EMAIL_HOST_PASSWORD=${NEWSLETTER_EMAIL_HOST_PASSWORD}
+
+      # stripe setup
+      - STRIPE_SECRET_KEY=${STRIPE_SECRET_KEY}
+      - STRIPE_PUBLISHABLE_KEY=${STRIPE_PUBLISHABLE_KEY}
+       
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.${COMPOSE_PROJECT_NAME}_tendenci.entrypoints=http"

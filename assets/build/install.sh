@@ -60,11 +60,11 @@ function install_tendenci()
 
 function create_cronjobs()
 {
-
+    
     echo "Creating cronjobs" && echo ""
-    (crontab -l ; echo "30   2 * * * $PYTHON $TENDENCI_INSTALL_DIR/manage.py run_nightly_commands") | crontab -
-    (crontab -l ; echo "30   2 * * * $PYTHON $TENDENCI_INSTALL_DIR/manage.py process_unindexed") | crontab -
-
+    # write task output to container logs
+    (crontab -l ; echo "30 0 * * * $PYTHON $TENDENCI_PROJECT_ROOT/manage.py run_nightly_commands > /proc/1/fd/1 2>&1") | crontab -
+    (crontab -l ; echo "40 0 * * * $PYTHON $TENDENCI_PROJECT_ROOT/manage.py process_unindexed > /proc/1/fd/1 2>&1") | crontab -
 }
 
 check_user

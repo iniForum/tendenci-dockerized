@@ -5,7 +5,6 @@
 
 # This script loads custom themes into ${TENDENCI_PROJECT_ROOT}/themes 
 
-source ../.env
 echo "Loading ./custom_themes to tendenci container ${COMPOSE_PROJECT_NAME}_tendenci"
 
 docker run --rm --volumes-from ${COMPOSE_PROJECT_NAME}_tendenci -v $(pwd)/custom_themes:/backup ubuntu bash -c "cd ${TENDENCI_PROJECT_ROOT} && tar xvf /backup/themes.tar"
