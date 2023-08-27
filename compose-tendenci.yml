@@ -4,12 +4,8 @@ services:
  
     tendenci:
         container_name: ${COMPOSE_PROJECT_NAME}_tendenci
- #       restart: always
      #   image: rjdini/tendenci:14.5.1
         image: rjdini/tendenci:test
-        # depends_on: 
-        #     postgresql:
-        #         condition: service_healthy
         volumes:
            - logs-vol:/var/log/mysite
            - root-vol:/home/tendenci/install/mysite

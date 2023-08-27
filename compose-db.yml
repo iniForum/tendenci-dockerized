@@ -18,14 +18,7 @@ services:
             - TENDENCI_DB=${POSTGRES_DB:-tendenci}
             - TENDENCI_PASS=${POSTGRES_PASSWORD:-mycomplexpassword}
             - POSTGRES_PASSWORD=${POSTGRES_SUPERUSER_PASSWORD:-mycomplexpassword}
-        # healthcheck:
-        #     test: ["CMD", "pg_isready", "-h", "localhost", "-d", "${POSTGRES_DB:-tendenci}", "-U", "${POSTGRES_USER:-tendenci-usr}", "-p", "5432"]
-        #     interval: 30s  # 20s
-        #     timeout: 5s
-        #     retries: 5
-
-
-
+    
 volumes:
     psql-vol:
 

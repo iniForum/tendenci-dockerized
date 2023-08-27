@@ -7,7 +7,7 @@ services:
     image: postgis/postgis:15-3.3
     volumes:
       - psql-vol:/var/lib/postgresql/data
-      - ./assets/build/initdb.sh:/docker-entrypoint-initdb.d/initdb.sh
+#      - ./assets/build/initdb.sh:/docker-entrypoint-initdb.d/initdb.sh
     ports:
       - ${PGDB_PORT}:5432
     networks:
@@ -34,7 +34,6 @@ services:
     volumes:
       - logs-vol:/var/log/mysite
       - root-vol:/home/tendenci/install/mysite
-      - ./assets/runtime:/runtime
     ports:
       #           - 6080:8000
       - 8000

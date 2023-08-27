@@ -2,3 +2,5 @@
 backup/localhost
 backup/*_sync
 backup/tendenci_*
+backup/test_volumes
+

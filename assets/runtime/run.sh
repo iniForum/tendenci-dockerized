@@ -2,6 +2,8 @@
 # 2023-08-23 23:38:51 rjd added init_cron, because the ubuntu container does not self start cron.
 
 PYTHON=$(which python3)
+TENDENCI_VERSION=$(pip show tendenci | grep Version)
+TENDENCI_HOST=$(hostname)
 
 function setup_keys()
 {
@@ -17,69 +19,82 @@ function setup_keys()
     echo "SITE_SETTINGS_KEY: $SITE_SETTINGS_KEY" && echo ""
 }
 
-function load_iniForum_secrets
+function load_iniforum_secrets
 {
-    # load secrets from compose file, which in turn is loading from .env
-    echo "Loading secrets"  && echo ""
+    # This function loads secrets from the compose file, which in turn is loading from .env
+    # This function replaces one instance of the variable, even if it is commented out by #.
+    # It ensures that there is only this single instance in the file.
+    # If no instance exists, then it will _not_ create one.
+
+    echo "*****  loading iniforum secrets / configuration  ***** "  && echo ""
+    
+    # general settings  
+    sed -i "s/^\#*\s*TIME_ZONE\s*=.*/TIME_ZONE='$TIME_ZONE'/g" \
+        "$TENDENCI_PROJECT_ROOT/conf/settings.py"
+    echo "TIME_ZONE: $TIME_ZONE" 
 
     # email settings   
-    sed -i "s/^EMAIL_BACKEND\s*=.*/EMAIL_BACKEND='$EMAIL_BACKEND'/g" \
+    sed -i "s/^\#*\s*EMAIL_BACKEND\s*=.*/EMAIL_BACKEND='$EMAIL_BACKEND'/g" \
         "$TENDENCI_PROJECT_ROOT/conf/settings.py"
-    echo "EMAIL_BACKEND: $EMAIL_BACKEND" && echo ""
+    echo "EMAIL_BACKEND: $EMAIL_BACKEND" 
 
-    sed -i "s/^EMAIL_USE_TLS\s*=.*/EMAIL_USE_TLS='$EMAIL_USE_TLS'/g" \
+    sed -i "s/^\#*\s*EMAIL_USE_TLS\s*=.*/EMAIL_USE_TLS='$EMAIL_USE_TLS'/g" \
         "$TENDENCI_PROJECT_ROOT/conf/settings.py"
-    echo "EMAIL_USE_TLS: $EMAIL_USE_TLS" && echo ""
+    echo "EMAIL_USE_TLS: $EMAIL_USE_TLS" 
 
-    sed -i "s/^EMAIL_HOST\s*=.*/EMAIL_HOST='$EMAIL_HOST'/g" \
+    sed -i "s/^\#*\s*EMAIL_HOST\s*=.*/EMAIL_HOST='$EMAIL_HOST'/g" \
         "$TENDENCI_PROJECT_ROOT/conf/settings.py"
-    echo "EMAIL_HOST: $EMAIL_HOST" && echo ""
+    echo "EMAIL_HOST: $EMAIL_HOST"
     
-    sed -i "s/^EMAIL_PORT\s*=.*/EMAIL_PORT='$EMAIL_PORT'/g" \
+    sed -i "s/^\#*\s*EMAIL_PORT\s*=.*/EMAIL_PORT='$EMAIL_PORT'/g" \
         "$TENDENCI_PROJECT_ROOT/conf/settings.py"
-    echo "EMAIL_PORT: $EMAIL_PORT" && echo ""
-    
-    sed -i "s/^EMAIL_HOST_USER\s*=.*/EMAIL_HOST_USER='$EMAIL_HOST_USER'/g" \
-        "$TENDENCI_PROJECT_ROOT/conf/settings.py"
-    echo "EMAIL_HOST_USER: $EMAIL_HOST_USER" && echo ""
-    
-    sed -i "s/^EMAIL_HOST_PASSWORD\s*=.*/EMAIL_HOST_PASSWORD='$EMAIL_HOST_PASSWORD'/g" \
-        "$TENDENCI_PROJECT_ROOT/conf/settings.py"
-    echo "EMAIL_HOST_PASSWORD: $EMAIL_HOST_PASSWORD" && echo ""
+    echo "EMAIL_PORT: $EMAIL_PORT"
 
-    sed -i "s/^DEFAULT_FROM_EMAIL\s*=.*/DEFAULT_FROM_EMAIL='$DEFAULT_FROM_EMAIL'/g" \
+    sed -i "s/^\#*\s*EMAIL_LOG_FILE\s*=.*/EMAIL_LOG_FILE='$EMAIL_LOG_FILE'/g" \
         "$TENDENCI_PROJECT_ROOT/conf/settings.py"
-    echo "DEFAULT_FROM_EMAIL: $DEFAULT_FROM_EMAIL" && echo ""
+    echo "EMAIL_LOG_FILE: $EMAIL_LOG_FILE"
 
-    sed -i "s/^SERVER_EMAIL\s*=.*/SERVER_EMAIL='$SERVER_EMAIL'/g" \
+    sed -i "s/^\#*\s*EMAIL_HOST_USER\s*=.*/EMAIL_HOST_USER='$EMAIL_HOST_USER'/g" \
         "$TENDENCI_PROJECT_ROOT/conf/settings.py"
-    echo "SERVER_EMAIL: $SERVER_EMAIL" && echo ""
+    echo "EMAIL_HOST_USER: $EMAIL_HOST_USER"
+    
+    sed -i "s/^\#*\s*EMAIL_HOST_PASSWORD\s*=.*/EMAIL_HOST_PASSWORD='$EMAIL_HOST_PASSWORD'/g" \
+        "$TENDENCI_PROJECT_ROOT/conf/settings.py"
+    echo "EMAIL_HOST_PASSWORD: $EMAIL_HOST_PASSWORD"
+
+    sed -i "s/^\#*\s*DEFAULT_FROM_EMAIL\s*=.*/DEFAULT_FROM_EMAIL='$DEFAULT_FROM_EMAIL'/g" \
+        "$TENDENCI_PROJECT_ROOT/conf/settings.py"
+    echo "DEFAULT_FROM_EMAIL: $DEFAULT_FROM_EMAIL"
+
+    sed -i "s/^\#*\s*SERVER_EMAIL\s*=.*/SERVER_EMAIL='$SERVER_EMAIL'/g" \
+        "$TENDENCI_PROJECT_ROOT/conf/settings.py"
+    echo "SERVER_EMAIL: $SERVER_EMAIL"
 
     # email newsletter settings
-    sed -i "s/^NEWSLETTER_EMAIL_HOST\s*=.*/NEWSLETTER_EMAIL_HOST='$NEWSLETTER_EMAIL_HOST'/g" \
+    sed -i "s/^\#*\s*NEWSLETTER_EMAIL_HOST\s*=.*/NEWSLETTER_EMAIL_HOST='$NEWSLETTER_EMAIL_HOST'/g" \
         "$TENDENCI_PROJECT_ROOT/conf/settings.py"
-    echo "NEWSLETTER_EMAIL_HOST: $NEWSLETTER_EMAIL_HOST" && echo ""
+    echo "NEWSLETTER_EMAIL_HOST: $NEWSLETTER_EMAIL_HOST"
 
-    sed -i "s/^NEWSLETTER_EMAIL_PORT\s*=.*/NEWSLETTER_EMAIL_PORT='$NEWSLETTER_EMAIL_PORT'/g" \
+    sed -i "s/^\#*\s*NEWSLETTER_EMAIL_PORT\s*=.*/NEWSLETTER_EMAIL_PORT='$NEWSLETTER_EMAIL_PORT'/g" \
         "$TENDENCI_PROJECT_ROOT/conf/settings.py"
-    echo "NEWSLETTER_EMAIL_PORT: $NEWSLETTER_EMAIL_PORT" && echo ""
+    echo "NEWSLETTER_EMAIL_PORT: $NEWSLETTER_EMAIL_PORT"
 
-    sed -i "s/^NEWSLETTER_EMAIL_HOST_USER\s*=.*/NEWSLETTER_EMAIL_HOST_USER='$NEWSLETTER_EMAIL_HOST_USER'/g" \
+    sed -i "s/^\#*\s*NEWSLETTER_EMAIL_HOST_USER\s*=.*/NEWSLETTER_EMAIL_HOST_USER='$NEWSLETTER_EMAIL_HOST_USER'/g" \
         "$TENDENCI_PROJECT_ROOT/conf/settings.py"
-    echo "NEWSLETTER_EMAIL_HOST_USER: $NEWSLETTER_EMAIL_HOST_USER" && echo ""
+    echo "NEWSLETTER_EMAIL_HOST_USER: $NEWSLETTER_EMAIL_HOST_USER"
 
-    sed -i "s/^NEWSLETTER_EMAIL_HOST_PASSWORD\s*=.*/NEWSLETTER_EMAIL_HOST_PASSWORD='$NEWSLETTER_EMAIL_HOST_PASSWORD'/g" \
+    sed -i "s/^\#*\s*NEWSLETTER_EMAIL_HOST_PASSWORD\s*=.*/NEWSLETTER_EMAIL_HOST_PASSWORD='$NEWSLETTER_EMAIL_HOST_PASSWORD'/g" \
         "$TENDENCI_PROJECT_ROOT/conf/settings.py"
-    echo "NEWSLETTER_EMAIL_HOST_PASSWORD: $NEWSLETTER_EMAIL_HOST_PASSWORD" && echo ""
+    echo "NEWSLETTER_EMAIL_HOST_PASSWORD: $NEWSLETTER_EMAIL_HOST_PASSWORD"
 
     # STRIPE settings
-    sed -i "s/^STRIPE_SECRET_KEY\s*=.*/STRIPE_SECRET_KEY='$STRIPE_SECRET_KEY'/g" \
+    sed -i "s/^\#*\s*STRIPE_SECRET_KEY\s*=.*/STRIPE_SECRET_KEY='$STRIPE_SECRET_KEY'/g" \
         "$TENDENCI_PROJECT_ROOT/conf/settings.py"
-    echo "STRIPE_SECRET_KEY: $STRIPE_SECRET_KEY" && echo ""
+    echo "STRIPE_SECRET_KEY: $STRIPE_SECRET_KEY"
 
-    sed -i "s/^STRIPE_PUBLISHABLE_KEY\s*=.*/STRIPE_PUBLISHABLE_KEY='$STRIPE_PUBLISHABLE_KEY'/g" \
+    sed -i "s/^\#*\s*STRIPE_PUBLISHABLE_KEY\s*=.*/STRIPE_PUBLISHABLE_KEY='$STRIPE_PUBLISHABLE_KEY'/g" \
         "$TENDENCI_PROJECT_ROOT/conf/settings.py"
-    echo "STRIPE_PUBLISHABLE_KEY: $STRIPE_PUBLISHABLE_KEY" && echo ""
+    echo "STRIPE_PUBLISHABLE_KEY: $STRIPE_PUBLISHABLE_KEY"
 
 }
 
@@ -166,11 +181,11 @@ function init_cron
     (crontab -l; echo "*/5 * * * * /usr/bin/echo \"\$(date) This is a cron execution test.\" > /proc/1/fd/1 2>&1") | sort -u | crontab - 
     
     # (crontab -l ; echo "30 0 * * * $PYTHON $TENDENCI_PROJECT_ROOT/manage.py run_nightly_commands > /proc/1/fd/1 2>&1") | crontab -
-    (crontab -l ; echo "*/10 * * * * /usr/bin echo "cron is running process_unindexed" > /proc/1/fd/1 2>&1 && $PYTHON $TENDENCI_PROJECT_ROOT/manage.py process_unindexed > /proc/1/fd/1 2>&1") | crontab -
+    (crontab -l ; echo "*/10 * * * * /usr/bin/echo "cron is running process_unindexed" > /proc/1/fd/1 2>&1 && $PYTHON $TENDENCI_PROJECT_ROOT/manage.py process_unindexed > /proc/1/fd/1 2>&1") | crontab -
 
 
     # cron must be started here. The unbuntu image does not auto start cron (or other forks).
-     echo  "***** Starting cron ******* " && echo ""
+     echo  "***** starting cron ******* " && echo ""
     /etc/init.d/cron start
 }
 
@@ -187,14 +202,19 @@ function run
 
 if [ ! -f "$TENDENCI_PROJECT_ROOT/conf/site_initialized_flag" ]; then
 
-# ******* Note that these functions write (by echo) secrets to docker logs for the container. Is thsi a security risk?
-    setup_keys
     create_settings
     initial_setup         
-    load_iniForum_secrets 
     run "$@"
 else
-    load_iniForum_secrets # testing here - in future this will run under first intialization
-    init_cron  # only run cron on an intialized, and restarted, system    
+    echo  "Siteurl: ${SITE_URL}" \
+    && echo "Tendenci: ${TENDENCI_VERSION}" \
+    && echo "Tendenci Host: ${TENDENCI_HOST}" \
+    && echo "Tendenci Project Root: ${TENDENCI_PROJECT_ROOT}"
+    cd "$TENDENCI_PROJECT_ROOT" \
+    && "$PYTHON" manage.py set_setting site global siteurl "$SITE_URL" 
+  
+    load_iniforum_secrets 
+  
+    init_cron  # only run cron on an initialized, and restarted, system    
     run "$@"
 fi

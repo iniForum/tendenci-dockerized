@@ -3,14 +3,38 @@ This code, and my instructions, are modified from the Tendeci repository: git@gi
 
 This repository git@github.com:iniforum/tendenci-dockerized.git is a fork of theirs.
 
-The test of their orginal README.md can be found at the bottom of this doc.
+Their orginal README.md can be found in this directory.
+
+## Overview
+Overall the build is well automated. However, there are two crucial issues to keep in mid:
+1. The postgis postgresql database and tendenci must share the same datasae name, user, and password! 
+2. Tendenci's settings.py file is crucial. If things are not running properly, 90% of the time this will be due to incorrect database and secrets settings in settings.py
 
 ## Procedure for building latest Tendenci Docker
+The standard way to generate a latest, base Tendeci system is:
 1. Run ./build.sh
 2. Once you have verified that Tendenci site is running as expected, backup this version reference version using instructions in ./backup/README.md
 
-## BEWARE (rjd 2023-08-10 08:23:51)
+### Setting up the postgis database
+Initialization of the container postgis/postgis is intialized by the tendenci container.
+
+When the tendenci container runs, it checks for /conf/site_initialized_flag. If this file is absent, it initializes the postgis container.
+
+The image postgis/postgis is already configued for postgis. However, the tendenci setup procedure calls for installing the old form of postgis templates. The docker build here will perfom this automatically on intialization via the assets/install/init.db script. This script will also create a project database; together with username and and password for that database. These variables are taken from the compose yaml file, which in turn grabs them from .env
+
+One the db is set up, tendenci container will perform a fresh install of tendenci. Finally it will start its webserver and you will find tendenci running at https://< whatever you have assigned in .env > 
+
+### BEWARE (rjd 2023-08-10 08:23:51)
 Code checks conf directory for an initialization flag. If the flag is absent, the database will be intialized. The original flag_name was 'first_run', which is changed now to 'site_initialized_flag'.
+
+## Configuring settings.py
+The fresh installation Tendenci will bring with it the mst recent settings.py. The secret keys and databse settings will be correct, but the EMAIL, NEWSLETTER, and STRIPE vallues will not be correctly set. 
+
+I have made a script load_iniforum_secrets in assets/runtime/run.sh that will grab the necessary values from the compose script, which in turn grabs them from .env. But sofar this script only updates existing values,which are not commented out!
+SO the simple manual fix  is to exec into tendenci container, go to conf, nano settings.py. Now remove the comment character '#' to the left of the EMAIL, NEWSLETTER, and STRIPE fields. The run load_iniforum_secrets, and the fields will be correctly updated from .env.  Clunky I know!...
+
+Now immediately backup the system using ./backup/backup_data.sh and ./backup/backup_sql.sh. These will store a snapshot in .localhost, which you can use to restore the system using the RESTORE scripts. (see the ./backup/ README.md for details).
+
 
 
 ## Procedure for installing a remote site to run on these postgis and tendenci containers

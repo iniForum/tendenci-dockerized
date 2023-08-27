@@ -3,13 +3,12 @@ FROM rjd_part1
 
 COPY assets/runtime/run.sh /runtime/run.sh
 
+COPY assets/iniforum/*.sh $TENDENCI_INSTALL_DIR
+RUN chmod +x $TENDENCI_INSTALL_DIR/*.sh
+
 VOLUME "$TENDENCI_PROJECT_ROOT" "$TENDENCI_LOG_DIR"
 
 WORKDIR "$TENDENCI_INSTALL_DIR"
 
 ENTRYPOINT [ "/bin/bash" ]
 CMD [ "/runtime/run.sh" ]
-
-# run user with restricted (non root) privileges 2023-08-22 08:53:20 rjd
-# RUN useradd -ms /bin/bash tendenci
-# USER tendenci
