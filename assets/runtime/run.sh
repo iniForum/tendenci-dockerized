@@ -178,10 +178,10 @@ function init_cron
     # Generating a crontab entry in as output from a bash script (such as this) for a substitution variable such as $(date) is tricky! 
     # We must escape the inner (transmitted to crontab) echo enclosing quotes as \" and also escape $ as \$
     # The -u option in sort is for keeping only unique lines. Note however, that sort may reorder the file job lines.
-    (crontab -l; echo "*/5 * * * * /usr/bin/echo \"\$(date) This is a cron execution test.\" > /proc/1/fd/1 2>&1") | sort -u | crontab - 
+    # (crontab -l; echo "*/5 * * * * /usr/bin/echo \"\$(date) This is a cron execution test.\" > /proc/1/fd/1 2>&1") | sort -u | crontab - 
     
     # (crontab -l ; echo "30 0 * * * $PYTHON $TENDENCI_PROJECT_ROOT/manage.py run_nightly_commands > /proc/1/fd/1 2>&1") | crontab -
-    (crontab -l ; echo "*/10 * * * * /usr/bin/echo "cron is running process_unindexed" > /proc/1/fd/1 2>&1 && $PYTHON $TENDENCI_PROJECT_ROOT/manage.py process_unindexed > /proc/1/fd/1 2>&1") | crontab -
+    # (crontab -l ; echo "*/10 * * * * /usr/bin/echo "cron is running process_unindexed" > /proc/1/fd/1 2>&1 && $PYTHON $TENDENCI_PROJECT_ROOT/manage.py process_unindexed > /proc/1/fd/1 2>&1") | crontab -
 
 
     # cron must be started here. The unbuntu image does not auto start cron (or other forks).
@@ -201,10 +201,12 @@ function run
 
 
 if [ ! -f "$TENDENCI_PROJECT_ROOT/conf/site_initialized_flag" ]; then
+# initialize system
 
     create_settings
     initial_setup         
     run "$@"
+
 else
     echo  "Siteurl: ${SITE_URL}" \
     && echo "Tendenci: ${TENDENCI_VERSION}" \
@@ -214,7 +216,7 @@ else
     && "$PYTHON" manage.py set_setting site global siteurl "$SITE_URL" 
   
     load_iniforum_secrets 
-  
-    init_cron  # only run cron on an initialized, and restarted, system    
+    init_cron  # only run cron on an already initialized system,    
+    
     run "$@"
 fi

@@ -26,8 +26,7 @@ services:
   tendenci:
     container_name: ${COMPOSE_PROJECT_NAME}_tendenci
     restart: always
-#    image: rjdini/tendenci:14.5.1
-    image: rjdini/tendenci:test  # testing cron
+    image: rjdini/tendenci:14.5.1
     depends_on:
       postgresql:
         condition: service_healthy

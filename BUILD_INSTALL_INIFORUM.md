@@ -1,41 +1,77 @@
 # rjd Procedures for setting up and running dockerized tendenci.
-This code, and my instructions, are modified from the Tendeci repository: git@github.com:tendenci/tendenci-dockerized.git. 
+This code, and my instructions, are modified from the Tendeci repository: git@github.com:tendenci/tendenci-dockerized.git.  The code has been elaborated for use in iniForum AMS proejcts.
 
-This repository git@github.com:iniforum/tendenci-dockerized.git is a fork of theirs.
+This repository git@github.com:iniforum/tendenci-dockerized.git is a fork of theirs. Their orginal README.md can be found in this directory.
 
-Their orginal README.md can be found in this directory.
 
-## Overview
-Overall the build is well automated. However, there are two crucial issues to keep in mid:
+## Procedure for building latest Tendenci container for running an iniForum site;
+
+### Overview
+Overall the process of building an iniforum system is fairly well automated. However, there remain important manual steps, as described below. During this process there are few crucial issues to keep in mind:
 1. The postgis postgresql database and tendenci must share the same datasae name, user, and password! 
 2. Tendenci's settings.py file is crucial. If things are not running properly, 90% of the time this will be due to incorrect database and secrets settings in settings.py
+3. Typically, we will be upgrading an exisitng AMS site; and so we will have to deal carefully with the compatibility between the old system, and the updated systenm's database, configuration, media, and themes. We want to retain all old material and update these with new developments. carefully labeled backups are key to the security of the upgrade.   
+4. **BEWARE** Tendenci checks its mysite/conf directory for an initialization flag. If the flag is absent, the database will be initialized. The original flag_name was 'first_run', which is changed now to 'site_initialized_flag'.
 
-## Procedure for building latest Tendenci Docker
-The standard way to generate a latest, base Tendeci system is:
+
+### First stage: build the most recent base Tendenci system:
 1. Run ./build.sh
-2. Once you have verified that Tendenci site is running as expected, backup this version reference version using instructions in ./backup/README.md
+2. Once you have verified that Tendenci site is running as expected, backup this reference Tendenci to ./backup/tendence_<>version>, using instructions in ./backup/README.md.
+3. For good measure, connect to the db using PgAdmin, and ensure that the psql contins the coorect database and user.
 
-### Setting up the postgis database
-Initialization of the container postgis/postgis is intialized by the tendenci container.
 
-When the tendenci container runs, it checks for /conf/site_initialized_flag. If this file is absent, it initializes the postgis container.
+./build.sh is the orignal tendenci pulled from the tendenci/tendenci-dockerized repo, via our iniForum fork iniform/tendenci-dockerized.
 
-The image postgis/postgis is already configued for postgis. However, the tendenci setup procedure calls for installing the old form of postgis templates. The docker build here will perfom this automatically on intialization via the assets/install/init.db script. This script will also create a project database; together with username and and password for that database. These variables are taken from the compose yaml file, which in turn grabs them from .env
+When the tendenci container runs, it checks for /conf/site_initialized_flag. If this file is absent (as it should be in a fresh build), it initializes the postgis container.
+
+Notice that the image postgis/postgis is already configued for postgis. Nevertheless, for reasons best known to Tendenci, the tendenci setup procedure installs the old form of postgis templates, and then works from there. The tendeci build will install these templates automatically on intialization via the assets/install/init.db script. This script will also create a project database; together with username and and password for that database. These variables are taken from the compose yaml file, which in turn grabs them from .env
 
 One the db is set up, tendenci container will perform a fresh install of tendenci. Finally it will start its webserver and you will find tendenci running at https://< whatever you have assigned in .env > 
 
-### BEWARE (rjd 2023-08-10 08:23:51)
-Code checks conf directory for an initialization flag. If the flag is absent, the database will be intialized. The original flag_name was 'first_run', which is changed now to 'site_initialized_flag'.
+### Second Stage:sync the remote webste data and sql to ./backup/< remotesite >_sync
+Use the detailed instructions in the ./backup/README.md
+1. go to remote host and backup the the remote sql and data.
+2. use the local ./backup/rsync-remote-host.sh to sync the more data to the ./local/< remote host >_sync directory.
 
-## Configuring settings.py
-The fresh installation Tendenci will bring with it the mst recent settings.py. The secret keys and databse settings will be correct, but the EMAIL, NEWSLETTER, and STRIPE vallues will not be correctly set. 
+### Third stage: add the old system db to postgis :
+Now we will use our comppose-db and compose-tendenci scripts rather than Tendenci's suppied docker-compose script. This is because we need to run db and tendenci containers separately during the update. SO:
+1. stop and remove the base containers by running docker-compose -f compose-db.yml down, and similary for compose-tendenci.yml. Confirm with eg Portainer that these containers have been removed, and that PgAdmin is stopped (we do not ).
+2. restart the db container only (The db generates erros if there are any connections to it other than the loaded).
+3. run ./clear_build_database. This will drop and rebuild our db, and prepare for loading of existing old databse. Note this is a stupid step. We should be able to load over the tendenci db - but this generates unexplained errors. TODO: solve this problem!!
+4. run ./RESTORE_sql.sh.  This will load your selected db (typically the most recent) from the ./backup/< remote >_sync directory. postgis will write its progress to stdout / logs. This process should (and must) complete without errors.
 
-I have made a script load_iniforum_secrets in assets/runtime/run.sh that will grab the necessary values from the compose script, which in turn grabs them from .env. But sofar this script only updates existing values,which are not commented out!
-SO the simple manual fix  is to exec into tendenci container, go to conf, nano settings.py. Now remove the comment character '#' to the left of the EMAIL, NEWSLETTER, and STRIPE fields. The run load_iniforum_secrets, and the fields will be correctly updated from .env.  Clunky I know!...
+### Forth stage: allow tendeci to update db  :
+The fresh installation Tendenci will bring with it the most recent Tendenci settings.py. The secret keys and database settings will be correct, however the EMAIL, NEWSLETTER, and STRIPE vallues will not be correctly set. They will be installed when we now bring up the Tendenci container.  
 
-Now immediately backup the system using ./backup/backup_data.sh and ./backup/backup_sql.sh. These will store a snapshot in .localhost, which you can use to restore the system using the RESTORE scripts. (see the ./backup/ README.md for details).
+1. restart tendenci: docker-compose -f compose-tendenci up.While loading Tendenci reports the values of all revelant environamental variables (that it is grabbing form .env). Check that these are all correct. 
+2. Eventually tendenci reports that it is operational. DO NOT try to run the website yet (tendenci is not yet configured)! 
+3. Use RESTORE_data.sh to restore ONLY media.tar and themes.tar from the remote_sync repository.
+4. Enter the running tendeci container usuing either Portainer, or docker exec -it < tendenci container name > /bin/bash, and check (eg using more or nano) that mysite/conf/settings.py are correct (ie conform to .env). Check that media and themes have been correctly loaded.
+5. If all is well, go to (still inside the tendenci container) the install directory (mother of mysite). Here, run the script minor-update.sh. This must complete without errors. (Tendenci 'check' may report one or two warnings). Now run set-permissions.sh (to ensure that these are correctly set.)
+6. go to the website url, and check that the site is running at the address specified in .env (and as specified in the traefic labels in compose-tendenci.yml). The first interactions will take time, because the site has to sort itself out, cache isloading, etc. Be patient.
+7. Now stop both containers, and then bring the up again, together this time, using compose-production.yml. 
+8. If all is well, then immediately backup the system to ./backup/localhost using both backup_sql.sh and backup_data.sh.
+9. tag the unpdated tendenci image with the version number docker tag rjdini/tendenci:test rjdini/tendenci:< version number >
+10. In both compose-temdence.yml and compose-production.yml, change the container image field in the tendeci service to rjdini/tendenci:< version number >
+11. push the tendenci image: docker push rjdini/tendenci:< version number >
+12. down and up again the compose-production.yml system, and confirm that all is well. Check that the correct image is running (docker container list, or portainer).
+
+### Final stage: deploy to remote site
+The above stages have yielded an upgraded version of the remote site, running at a local URL. We retain this developemnt version on dev as backup, and send a copy of it to the remote machine where we make adjsutment sfor remote deployment.
+1. use rysnc or FileZilla to transfer a copy of the current project directory to eg < project_new > directory on the remote host.
+2. pull the updated tendenci image: docker pull rjdini/tendenci:< version number >
+3. on the remote host edit .env settings such as COMPOSE_PROJECT_NAME and SITE_URL to conform to the remote context.
+4. check the traefic host tendenci.rule=Host and tendenci-secure.rule=Host settings to ensure that they conform to the required project URL settings.
+5. stop the old site, and bring up the new site using compose-production.yml.
+6. If all is well, move the old project directory to < old project directory >_old (keep for a few days, just incase...); and move < project_new > to < project >.
+7. Finally - remove all developmental files and directories, leaving only those require for running the projection website: .env, compose-production.yml, ./backup/backup*, ./backup/RESTORE*, and ./backup/localhost.
+
+Thats it!! hopefully...
 
 
+
+----------------------------------------------------------------------
+# Superceded notes and reminders
 
 ## Procedure for installing a remote site to run on these postgis and tendenci containers
 1. Ensure that you have a clean new installation of Tendenci running (as above).

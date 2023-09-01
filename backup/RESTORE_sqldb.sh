@@ -19,11 +19,30 @@ echo "Restoring SQL backup to postgis container ${COMPOSE_PROJECT_NAME}_postgis.
 
 #!/bin/bash
 printf "\nPlease select folder:\n"
-select d in */; do test -n "$d" && break; echo ">>> Invalid Selection"; done
+# select d in */; do test -n "$d" && break; echo ">>> Invalid Selection"; done
+dirs=(*/)
+
+read -p "$(
+        f=0
+        for dirname in "${dirs[@]}" ; do
+            f=$f+1
+            if [[ "$dirname" == *"volume"* ]]; then
+                continue
+            fi
+            echo "$((f)): $dirname"
+        done
+
+        echo -ne 'Please select a directory > '
+)" selection
+
+selected_dir="${dirs[$((selection-1))]}"
+
+echo "You selected '$selected_dir'"
+# d = $selected_dir
 # cd "$d" && pwd
 
 # files=( "$d"*.sql )
-set -- "$d"*.sql
+set -- "$selected_dir"*.sql
 printf "\nPlease select dump to load:\n"
 while true; do
     i=0
@@ -58,9 +77,9 @@ read -p "Do you want to proceed restoring $file into ${COMPOSE_PROJECT_NAME}_pos
 
 case $yn in 
 	[yY] ) echo ""
-    echo "Restoring the DB now"
-    #cat ./$file | docker exec -i ${COMPOSE_PROJECT_NAME}_postgis /usr/bin/psql -h localhost -U postgres
-    echo "cat ./$file | docker exec -i ${COMPOSE_PROJECT_NAME}_postgis /usr/bin/psql -h localhost -U postgres"
+        echo "Restoring the DB now\n"
+        echo "executing: cat ./$file | docker exec -i ${COMPOSE_PROJECT_NAME}_postgis /usr/bin/psql -h localhost -U postgres\n"
+        cat ./$file | docker exec -i ${COMPOSE_PROJECT_NAME}_postgis /usr/bin/psql -h localhost -U postgres
 		break;;
 	[nN] ) echo exiting...;
 		exit;;
